@@ -20,7 +20,6 @@ namespace TerrariaWrapper
             {
                 if (!(Server != null) || !Server.Running)
                 {
-                    AddConsoleLine("asdf", Color.Black);
                     if (Server != null)
                     {
                         AddConsoleLine($"{Server.Running}", Color.Black);
