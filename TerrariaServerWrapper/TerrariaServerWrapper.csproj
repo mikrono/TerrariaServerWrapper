@@ -46,6 +46,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PseudoTerminal\Native\ConsoleApi.cs" />
+    <Compile Include="PseudoTerminal\Native\ProcessApi.cs" />
+    <Compile Include="PseudoTerminal\Native\PseudoConsoleApi.cs" />
+    <Compile Include="PseudoTerminal\Processes\Process.cs" />
+    <Compile Include="PseudoTerminal\Processes\ProcessFactory.cs" />
+    <Compile Include="PseudoTerminal\PseudoConsole.cs" />
+    <Compile Include="PseudoTerminal\PseudoConsolePipe.cs" />
+    <Compile Include="PseudoTerminal\Terminal.cs" />
     <Compile Include="TerrariaServer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -54,7 +62,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerWrapper.cs" />
+    <Compile Include="ConsoleWrapper.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
