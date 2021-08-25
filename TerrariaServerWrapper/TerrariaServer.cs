@@ -4,7 +4,6 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using TerrariaServerWrapper.PseudoTerminal;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,13 +27,13 @@ namespace TerrariaWrapper
                 {
                     if (Server != null)
                     {
-                        Task.Run(() => Server.Start());
+                        Server.Start();
                     }
                     else
                     {
-                        Server = new ConsoleWrapper(ServerPath, 100, 60);
-                        Task.Run(() => Server.Start());
-                        Server.OutputReady += Terminal_OutputReady;
+                        Server = new ConsoleWrapper(ServerPath, 100, 60, "");
+                        Server.Start();
+                        Task.Run(() => ReadOutPut(Server.STDOUT, Encoding.UTF8));
                     }
                 }
             });
@@ -59,13 +58,13 @@ namespace TerrariaWrapper
         {
             if (e.KeyCode == Keys.Enter)
             {
-                SendCommand(commandBox.Text);
+                WriteConsole(commandBox.Text);
                 commandBox.Text = "";
             }
         }
         private void commandbutton_Click(object sender, EventArgs e)
         {
-            SendCommand(commandBox.Text);
+            WriteConsole(commandBox.Text);
             commandBox.Text = "";
         }
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
@@ -109,51 +108,81 @@ namespace TerrariaWrapper
         #region ConsoleIO
         public void AddConsoleLine(string text, Color color)
         {
-            ServerConsole.SuspendLayout();
-            ServerConsole.SelectionColor = color;
-            ServerConsole.AppendText($"{DateTime.Now:[HH:mm:ss]} {text}{Environment.NewLine}");
-            ServerConsole.ScrollToCaret();
-            ServerConsole.ResumeLayout();
+            Invoke((MethodInvoker)delegate
+            {
+                ServerConsole.SuspendLayout();
+                ServerConsole.SelectionColor = color;
+                ServerConsole.AppendText($"{DateTime.Now:[HH:mm:ss]} {text}{Environment.NewLine}");
+                ServerConsole.ScrollToCaret();
+                ServerConsole.ResumeLayout();
+            });
         }
-        public void StreamConsoleLine(string text, Color color)
-        {
-            ServerConsole.SuspendLayout();
-            ServerConsole.SelectionColor = color;
-            ServerConsole.AppendText($"{text}");
-            ServerConsole.ResumeLayout();
-        }
-        public void SendCommand(string command)
+        public void WriteConsole(string command)
         {
             Invoke((MethodInvoker)delegate
             {
                 if (Server == null) return;
                 AddConsoleLine(command, Color.Red);
-                Server.SendCommand(command);
+                Server.WriteConsole(command, Encoding.UTF8);
             });
         }
-        private void Terminal_OutputReady(object sender, EventArgs e)
+
+        public void GetConsoleOutPut(object sender, string e)
         {
-            // Start a long-lived thread for the "read console" task, so that we don't use a standard thread pool thread.
-            Task.Factory.StartNew(() => CopyConsoleToWindow(), TaskCreationOptions.LongRunning);
-        }
-        private void CopyConsoleToWindow()
-        {
-            using (StreamReader reader = new StreamReader(Server.ConsoleOutStream))
+            Invoke((MethodInvoker)delegate
             {
-                // Read the console's output 1 character at a time
-                int bytesRead;
-                char[] buf = new char[1];
-                while ((bytesRead = reader.ReadBlock(buf, 0, 1)) != 0)
+                AddConsoleLine(e, Color.Black);
+            });
+        }
+
+        public void ReadOutPut(Stream stream, Encoding encoding)
+        {
+            using (var reader = new StreamReader(stream, encoding ,true))
+            {
+                var buffer = new StringBuilder(1024);
+
+                int iChar = reader.Read();
+                if (iChar < 0)
                 {
-                    // This is where you'd parse and tokenize the incoming VT100 text, most likely.
-                    Invoke((MethodInvoker)delegate
-                    {
-                        // ...and then you'd do something to render it.
-                        // For now, just emit raw VT100 to the primary TextBlock.
-                        StreamConsoleLine( new string(buf.Take(bytesRead).ToArray()), Color.Black);
-                    });
+                    return;
+                }
+
+                var c = (char)iChar;
+
+                while (true)
+                {
+                    buffer.Append(c);
+
+                    if (reader.Peek() < 0)
+                        FlushBuffer();
+
+                    iChar = reader.Read();
+                    c = (char)iChar;
+                }
+
+                void FlushBuffer()
+                {
+                    if (buffer.Length > 0)
+                        AddConsoleLine(buffer.ToString(), Color.Black);
+                        buffer.Clear();
                 }
             }
+        }
+        private static string DecodeFromStream(Stream dataStream, Encoding encoding, int bufferSize)
+        {
+            Decoder decoder = encoding.GetDecoder();
+            StringBuilder sb = new StringBuilder();
+            int inputByteCount;
+            byte[] inputBuffer = new byte[bufferSize];
+            char[] charBuffer = new char[encoding.GetMaxCharCount(inputBuffer.Length)];
+
+            while ((inputByteCount = dataStream.Read(inputBuffer, 0, inputBuffer.Length)) > 0)
+            {
+                int readChars = decoder.GetChars(inputBuffer, 0, inputByteCount, charBuffer, 0);
+                if (readChars > 0)
+                    sb.Append(charBuffer, 0, readChars);
+            }
+            return sb.ToString();
         }
         #endregion
     }
