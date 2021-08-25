@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using static winpty.WinPty;
 using Microsoft.Win32.SafeHandles;
-using static TerrariaServerWrapper.PseudoTerminal.Native.ConsoleApi;
-using TerrariaServerWrapper.PseudoTerminal.Processes;
-using TerrariaServerWrapper.PseudoTerminal;
+using System.Runtime.InteropServices;
+using TerrariaServerWrapper;
 
 namespace TerrariaWrapper
 {
@@ -15,45 +18,54 @@ namespace TerrariaWrapper
     {
         public enum ConsoleState { Off = 0, Running = 1 };
         public ConsoleState State;
-        public int ConsoleWidth;
-        public int ConsoleHeight;
-        public string FilePath;
-        private SafeFileHandle _consoleInputPipeWriteHandle;
-        private StreamWriter _consoleInputWriter;
-        public FileStream ConsoleOutStream { get; private set; }
-        public event EventHandler OutputReady;
+        private int ConsoleWidth;
+        private int ConsoleHeight;
+        private string FilePath;
+        private string Args;
 
-        public ConsoleWrapper(string filePath, int consoleWidth, int consoleHeight)
+        private IntPtr hError;
+        private IntPtr hPtyConfig;
+        private IntPtr hPty;
+        private IntPtr hSpawnPtyConfig;
+        public Stream STDIN;
+        public Stream STDOUT;
+
+
+        public ConsoleWrapper(string filePath, int consoleWidth, int consoleHeight, string args)
         {
             FilePath = filePath;
             State = ConsoleState.Off;
             // Size of pseudo console(by charcter).
             ConsoleWidth = consoleWidth;
             ConsoleHeight = consoleHeight;
+            Args = args;
         }
 
         public void Start()
         {
-            using (var inputPipe = new PseudoConsolePipe())
-            using (var outputPipe = new PseudoConsolePipe())
-            using (var pseudoConsole = PseudoConsole.Create(inputPipe.ReadSide, outputPipe.WriteSide, ConsoleWidth, ConsoleHeight))
-            using (var process = ProcessFactory.Start(FilePath, PseudoConsole.PseudoConsoleThreadAttribute, pseudoConsole.Handle))
+            try
             {
-                // copy all pseudoconsole output to a FileStream and expose it to the rest of the app
-                ConsoleOutStream = new FileStream(outputPipe.ReadSide, FileAccess.Read);
-                OutputReady.Invoke(this, EventArgs.Empty);
+                hPtyConfig = winpty_config_new(WINPTY_FLAG_COLOR_ESCAPES, out hError);
+                ErrorCheck(hError);
+                winpty_config_set_initial_size(hPtyConfig, ConsoleHeight, ConsoleWidth);
+                hPty = winpty_open(hPtyConfig, out hError);
+                ErrorCheck(hError);
+                hSpawnPtyConfig = winpty_spawn_config_new(WINPTY_SPAWN_FLAG_AUTO_SHUTDOWN, FilePath, Args, Path.GetDirectoryName(FilePath), null, out hError);
+                ErrorCheck(hError);
 
-                // Store input pipe handle, and a writer for later reuse
-                _consoleInputPipeWriteHandle = inputPipe.WriteSide;
-                _consoleInputWriter = new StreamWriter(new FileStream(_consoleInputPipeWriteHandle, FileAccess.Write))
+                STDIN = CreatePipe(winpty_conin_name(hPty), PipeDirection.Out);
+                STDOUT = CreatePipe(winpty_conout_name(hPty), PipeDirection.In);
+
+                if (!winpty_spawn(hPty, hSpawnPtyConfig, out IntPtr hProcess, out IntPtr hThread, out int _, out hError))
                 {
-                    AutoFlush = true
-                };
-
-                // free resources in case the console is ungracefully closed (e.g. by the 'x' in the window titlebar)
-                OnClose(() => DisposeResources(process, pseudoConsole, outputPipe, inputPipe, _consoleInputWriter));
-
-                WaitForExit(process).WaitOne(Timeout.Infinite);
+                    ErrorCheck(hError);
+                }
+            }
+            finally
+            {
+                winpty_config_free(hPtyConfig);
+                winpty_spawn_config_free(hSpawnPtyConfig);
+                winpty_error_free(hError);
             }
         }
 
@@ -61,31 +73,41 @@ namespace TerrariaWrapper
         /// Write string into console
         /// </summary>
         /// <param name="input"></param>
-        public void SendCommand(string input)
+        public void WriteConsole(string input, Encoding encoding)
         {
-            if (_consoleInputWriter == null)
-            {
-                throw new InvalidOperationException("There is no writer attached to a pseudoconsole. Have you called Start on this instance yet?");
-            }
-            _consoleInputWriter.Write(input);
+            Encoder encoder = encoding.GetEncoder();
+            char[] string1 = $"{input}{Environment.NewLine}".ToCharArray();
+            Byte[] bytes = new Byte[1024];
+            _ = encoder.GetBytes(string1, 0, string1.Length, bytes, 0, true);
+            STDIN.Write(bytes, 0, bytes.Length);
         }
 
-        /// <summary>
-        /// Set a callback for when the terminal is closed (e.g. via the "X" window decoration button).
-        /// Intended for resource cleanup logic.
-        /// </summary>
-        private static void OnClose(Action handler)
+        private void ErrorCheck(IntPtr error)
         {
-            SetConsoleCtrlHandler(eventType =>
+            if (error == IntPtr.Zero) return;
+            throw new Exception($"{winpty_error_code(error)}, {winpty_error_msg(error)}");
+        }
+        private Stream CreatePipe(string pipeName, PipeDirection direction)
+        {
+            string serverName = ".";
+            if (pipeName.StartsWith("\\"))
             {
-                if (eventType == CtrlTypes.CTRL_CLOSE_EVENT)
+                int slash3 = pipeName.IndexOf('\\', 2);
+                if (slash3 != -1)
                 {
-                    handler();
+                    serverName = pipeName.Substring(2, slash3 - 2);
                 }
-                return false;
-            }, true);
-        }
+                int slash4 = pipeName.IndexOf('\\', slash3 + 1);
+                if (slash4 != -1)
+                {
+                    pipeName = pipeName.Substring(slash4 + 1);
+                }
+            }
 
+            var pipe = new NamedPipeClientStream(serverName, pipeName, direction);
+            pipe.Connect();
+            return pipe;
+        }
         private void DisposeResources(params IDisposable[] disposables)
         {
             foreach (var disposable in disposables)
@@ -93,14 +115,5 @@ namespace TerrariaWrapper
                 disposable.Dispose();
             }
         }
-
-        /// <summary>
-        /// Get an AutoResetEvent that signals when the process exits
-        /// </summary>
-        private static AutoResetEvent WaitForExit(Process process) =>
-            new AutoResetEvent(false)
-            {
-                SafeWaitHandle = new SafeWaitHandle(process.ProcessInfo.hProcess, ownsHandle: false)
-            };
     }
 }

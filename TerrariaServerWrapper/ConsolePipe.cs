@@ -1,8 +1,9 @@
 ﻿using Microsoft.Win32.SafeHandles;
 using System;
-using static TerrariaServerWrapper.PseudoTerminal.Native.PseudoConsoleApi;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 
-namespace TerrariaServerWrapper.PseudoTerminal
+namespace TerrariaWrapper
 {
     /// <summary>
     /// A pipe used to talk to the pseudoconsole, as described in:
@@ -16,15 +17,29 @@ namespace TerrariaServerWrapper.PseudoTerminal
         public readonly SafeFileHandle ReadSide;
         public readonly SafeFileHandle WriteSide;
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        internal static extern bool CreatePipe(out SafeFileHandle hReadPipe, out SafeFileHandle hWritePipe, IntPtr lpPipeAttributes, int nSize);
+
         public PseudoConsolePipe()
         {
             if (!CreatePipe(out ReadSide, out WriteSide, IntPtr.Zero, 0))
             {
-                throw new InvalidOperationException("failed to create pipe");
+                throw new Win32Exception(Marshal.GetLastWin32Error(), "failed to create pipe");
             }
         }
 
+        ~PseudoConsolePipe()
+        {
+            Dispose(false);
+        }
+
         #region IDisposable
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         void Dispose(bool disposing)
         {
@@ -33,12 +48,6 @@ namespace TerrariaServerWrapper.PseudoTerminal
                 ReadSide?.Dispose();
                 WriteSide?.Dispose();
             }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         #endregion
