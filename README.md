@@ -8,13 +8,14 @@ This is meant to making easier for me to manage my tModLoader Server.
 
 ## TO DO?
 
-- µð½ºÄÚµå ·Î±× ÄÜ¼Ö ¸¸µé±â
-- ÅõÇ¥ ±â´É ±¸ÇöÇÏ±â
-- ElectronÀ¸·Î ´Ù½Ã Â¥±â
-- ¸í·É¾î¿¡ ´ëÇÑ ±ÇÇÑ
-- ¾²±â ÆíÇÑ API ¸¸µé±â
-- ¿¹¿ÜÃ³¸®
-- ÄÜ¼Ö »ö Áö¿ø
-- ´Ù¸¥ °ÔÀÓ Áö¿ø?
-- conpty·Î ÀüÈ¯ÇÏ±â
-- ¸í·É ¸ðµâ Ãß°¡
+- ë””ìŠ¤ì½”ë“œ ë¡œê·¸ ì½˜ì†” ë§Œë“¤ê¸°
+- íˆ¬í‘œ ê¸°ëŠ¥ êµ¬í˜„í•˜ê¸°
+- Electronìœ¼ë¡œ ë‹¤ì‹œ ì§œê¸°
+- ëª…ë ¹ì–´ì— ëŒ€í•œ ê¶Œí•œ
+- ì“°ê¸° íŽ¸í•œ API ë§Œë“¤ê¸°
+- ì˜ˆì™¸ì²˜ë¦¬
+- ì½˜ì†” ìƒ‰ ì§€ì›
+- ë‹¤ë¥¸ ê²Œìž„ ì§€ì›?
+- conptyë¡œ ì „í™˜í•˜ê¸°
+- ëª…ë ¹ ëª¨ë“ˆ ì¶”ê°€
+- ì£¼ì„ ì¶”ê°€í•˜ê¸°
