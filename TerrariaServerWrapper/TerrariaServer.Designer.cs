@@ -1,5 +1,5 @@
 ﻿
-namespace TerrariaWrapper
+namespace TerrariaServerWrapper
 {
     partial class TerrariaServer
     {
@@ -29,6 +29,7 @@ namespace TerrariaWrapper
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TerrariaServer));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.PlayerList = new System.Windows.Forms.ListBox();
@@ -38,14 +39,16 @@ namespace TerrariaWrapper
             this.serverToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.pathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.discordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.DiscordSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serverOfflineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.commandbutton = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
+            this.PlayerListUp = new System.Windows.Forms.Button();
+            this.PlayerListDown = new System.Windows.Forms.Button();
+            this.KickSelectedPlayer = new System.Windows.Forms.Button();
+            this.BanSelectedPlayer = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -113,7 +116,8 @@ namespace TerrariaWrapper
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.serverToolStripMenuItem1});
+            this.serverToolStripMenuItem1,
+            this.discordToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1158, 24);
@@ -145,6 +149,21 @@ namespace TerrariaWrapper
             this.startToolStripMenuItem.Text = "Start";
             this.startToolStripMenuItem.Click += new System.EventHandler(this.startToolStripMenuItem_Click);
             // 
+            // discordToolStripMenuItem
+            // 
+            this.discordToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.DiscordSettingsToolStripMenuItem});
+            this.discordToolStripMenuItem.Name = "discordToolStripMenuItem";
+            this.discordToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
+            this.discordToolStripMenuItem.Text = "Discord";
+            // 
+            // DiscordSettingsToolStripMenuItem
+            // 
+            this.DiscordSettingsToolStripMenuItem.Name = "DiscordSettingsToolStripMenuItem";
+            this.DiscordSettingsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.DiscordSettingsToolStripMenuItem.Text = "Settings";
+            this.DiscordSettingsToolStripMenuItem.Click += new System.EventHandler(this.DiscordSettingsToolStripMenuItem_Click);
+            // 
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -174,42 +193,45 @@ namespace TerrariaWrapper
             this.commandbutton.UseVisualStyleBackColor = true;
             this.commandbutton.Click += new System.EventHandler(this.commandbutton_Click);
             // 
-            // button1
+            // PlayerListUp
             // 
-            this.button1.Location = new System.Drawing.Point(8, 571);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(25, 23);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "▲";
-            this.button1.UseVisualStyleBackColor = true;
+            this.PlayerListUp.Location = new System.Drawing.Point(8, 571);
+            this.PlayerListUp.Name = "PlayerListUp";
+            this.PlayerListUp.Size = new System.Drawing.Size(25, 23);
+            this.PlayerListUp.TabIndex = 7;
+            this.PlayerListUp.Text = "▲";
+            this.PlayerListUp.UseVisualStyleBackColor = true;
+            this.PlayerListUp.Click += new System.EventHandler(this.PlayerListUp_Click);
             // 
-            // button2
+            // PlayerListDown
             // 
-            this.button2.Location = new System.Drawing.Point(39, 571);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(25, 23);
-            this.button2.TabIndex = 8;
-            this.button2.Text = "▼";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.PlayerListDown.Location = new System.Drawing.Point(39, 571);
+            this.PlayerListDown.Name = "PlayerListDown";
+            this.PlayerListDown.Size = new System.Drawing.Size(25, 23);
+            this.PlayerListDown.TabIndex = 8;
+            this.PlayerListDown.Text = "▼";
+            this.PlayerListDown.UseVisualStyleBackColor = true;
+            this.PlayerListDown.Click += new System.EventHandler(this.PlayerListDown_Click);
             // 
-            // button3
+            // KickSelectedPlayer
             // 
-            this.button3.Location = new System.Drawing.Point(70, 571);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 9;
-            this.button3.Text = "Kick";
-            this.button3.UseVisualStyleBackColor = true;
+            this.KickSelectedPlayer.Location = new System.Drawing.Point(70, 571);
+            this.KickSelectedPlayer.Name = "KickSelectedPlayer";
+            this.KickSelectedPlayer.Size = new System.Drawing.Size(75, 23);
+            this.KickSelectedPlayer.TabIndex = 9;
+            this.KickSelectedPlayer.Text = "Kick";
+            this.KickSelectedPlayer.UseVisualStyleBackColor = true;
+            this.KickSelectedPlayer.Click += new System.EventHandler(this.KickSelectedPlayer_Click);
             // 
-            // button4
+            // BanSelectedPlayer
             // 
-            this.button4.Location = new System.Drawing.Point(151, 571);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 10;
-            this.button4.Text = "Ban";
-            this.button4.UseVisualStyleBackColor = true;
+            this.BanSelectedPlayer.Location = new System.Drawing.Point(151, 571);
+            this.BanSelectedPlayer.Name = "BanSelectedPlayer";
+            this.BanSelectedPlayer.Size = new System.Drawing.Size(75, 23);
+            this.BanSelectedPlayer.TabIndex = 10;
+            this.BanSelectedPlayer.Text = "Ban";
+            this.BanSelectedPlayer.UseVisualStyleBackColor = true;
+            this.BanSelectedPlayer.Click += new System.EventHandler(this.BanSelectedPlayer_Click);
             // 
             // TerrariaServer
             // 
@@ -217,10 +239,10 @@ namespace TerrariaWrapper
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1158, 603);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.BanSelectedPlayer);
+            this.Controls.Add(this.KickSelectedPlayer);
+            this.Controls.Add(this.PlayerListDown);
+            this.Controls.Add(this.PlayerListUp);
             this.Controls.Add(this.commandbutton);
             this.Controls.Add(this.commandBox);
             this.Controls.Add(this.ServerConsole);
@@ -228,6 +250,7 @@ namespace TerrariaWrapper
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.menuStrip1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "TerrariaServer";
             this.Text = "TerrariaServerWrapper";
@@ -253,11 +276,13 @@ namespace TerrariaWrapper
         private System.Windows.Forms.ToolStripMenuItem serverToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem pathToolStripMenuItem;
         private System.Windows.Forms.Button commandbutton;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button PlayerListUp;
+        private System.Windows.Forms.Button PlayerListDown;
+        private System.Windows.Forms.Button KickSelectedPlayer;
+        private System.Windows.Forms.Button BanSelectedPlayer;
         private System.Windows.Forms.ToolStripMenuItem startToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem discordToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem DiscordSettingsToolStripMenuItem;
     }
 }
 

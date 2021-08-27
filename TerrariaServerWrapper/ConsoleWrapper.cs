@@ -10,9 +10,8 @@ using System.Windows.Forms;
 using static winpty.WinPty;
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
-using TerrariaServerWrapper;
 
-namespace TerrariaWrapper
+namespace TerrariaServerWrapper
 {
     class ConsoleWrapper
     {
@@ -47,7 +46,7 @@ namespace TerrariaWrapper
             {
                 hPtyConfig = winpty_config_new(WINPTY_FLAG_COLOR_ESCAPES, out hError);
                 ErrorCheck(hError);
-                winpty_config_set_initial_size(hPtyConfig, ConsoleHeight, ConsoleWidth);
+                winpty_config_set_initial_size(hPtyConfig, ConsoleWidth, ConsoleHeight);
                 hPty = winpty_open(hPtyConfig, out hError);
                 ErrorCheck(hError);
                 hSpawnPtyConfig = winpty_spawn_config_new(WINPTY_SPAWN_FLAG_AUTO_SHUTDOWN, FilePath, Args, Path.GetDirectoryName(FilePath), null, out hError);
@@ -76,8 +75,8 @@ namespace TerrariaWrapper
         public void WriteConsole(string input, Encoding encoding)
         {
             Encoder encoder = encoding.GetEncoder();
-            char[] string1 = $"{input}{Environment.NewLine}".ToCharArray();
-            Byte[] bytes = new Byte[1024];
+            char[] string1 = $"{input}{System.Environment.NewLine}".ToCharArray();
+            byte[] bytes = new byte[1024];
             _ = encoder.GetBytes(string1, 0, string1.Length, bytes, 0, true);
             STDIN.Write(bytes, 0, bytes.Length);
         }
