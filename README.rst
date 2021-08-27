@@ -2,11 +2,11 @@ Terraria Server Wrapper
 =======================
 This is meant to making easier for me to manage my tModLoader Server.
 
-###Resources
+### Resources
 - https://github.com/Aux/Discord.Net-Example
 - https://github.com/xPanini/TCR-TerrariaChatRelay
 
-###TO DO?
+### TO DO?
 
 - 디스코드 로그 콘솔 만들기
 - 투표 기능 구현하기
