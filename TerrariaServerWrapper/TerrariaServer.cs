@@ -7,8 +7,10 @@ using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using TerrariaServerWrapper.Config;
 
-namespace TerrariaWrapper
+namespace TerrariaServerWrapper
 {
     public partial class TerrariaServer : Form
     {
@@ -18,6 +20,8 @@ namespace TerrariaWrapper
         {
             InitializeComponent();
             Server = null;
+            EnvVar.TSWconfig = (TSWConfig)new TSWConfig().GetConfig();
+            TerrariaServerController controller = new TerrariaServerController(this);
         }
         public void StartServer()
         {
@@ -31,7 +35,7 @@ namespace TerrariaWrapper
                     }
                     else
                     {
-                        Server = new ConsoleWrapper(ServerPath, 100, 60, "");
+                        Server = new ConsoleWrapper(ServerPath, 200, 10, "");
                         Server.Start();
                         Task.Run(() => ReadOutPut(Server.STDOUT, Encoding.UTF8));
                     }
@@ -94,11 +98,6 @@ namespace TerrariaWrapper
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void serverToolStripMenuItem1_Click(object sender, EventArgs e)
         {
 
@@ -106,13 +105,13 @@ namespace TerrariaWrapper
         #endregion
 
         #region ConsoleIO
-        public void AddConsoleLine(string text, Color color)
+        public void AddConsoleLine(string text, Color color, bool displayTime = false)
         {
             Invoke((MethodInvoker)delegate
             {
                 ServerConsole.SuspendLayout();
                 ServerConsole.SelectionColor = color;
-                ServerConsole.AppendText($"{DateTime.Now:[HH:mm:ss]} {text}{Environment.NewLine}");
+                ServerConsole.AppendText(displayTime ? $"{text}{Environment.NewLine}" : $"{DateTime.Now:[HH:mm:ss]} {text}{System.Environment.NewLine}");
                 ServerConsole.ScrollToCaret();
                 ServerConsole.ResumeLayout();
             });
@@ -122,24 +121,16 @@ namespace TerrariaWrapper
             Invoke((MethodInvoker)delegate
             {
                 if (Server == null) return;
-                AddConsoleLine(command, Color.Red);
+                AddConsoleLine(command, Color.DarkCyan);
                 Server.WriteConsole(command, Encoding.UTF8);
-            });
-        }
-
-        public void GetConsoleOutPut(object sender, string e)
-        {
-            Invoke((MethodInvoker)delegate
-            {
-                AddConsoleLine(e, Color.Black);
             });
         }
 
         public void ReadOutPut(Stream stream, Encoding encoding)
         {
-            using (var reader = new StreamReader(stream, encoding ,true))
+            using (StreamReader reader = new StreamReader(stream, encoding))
             {
-                var buffer = new StringBuilder(1024);
+                StringBuilder buffer = new StringBuilder(1024);
 
                 int iChar = reader.Read();
                 if (iChar < 0)
@@ -154,36 +145,118 @@ namespace TerrariaWrapper
                     buffer.Append(c);
 
                     if (reader.Peek() < 0)
-                        FlushBuffer();
+                        InvokeParser();
 
                     iChar = reader.Read();
                     c = (char)iChar;
                 }
 
-                void FlushBuffer()
+                void InvokeParser()
                 {
-                    if (buffer.Length > 0)
-                        AddConsoleLine(buffer.ToString(), Color.Black);
+                    if (buffer.Length > 0) 
+                    {
+                        Parser(buffer.ToString().Trim());
                         buffer.Clear();
+                    }
                 }
             }
         }
-        private static string DecodeFromStream(Stream dataStream, Encoding encoding, int bufferSize)
-        {
-            Decoder decoder = encoding.GetDecoder();
-            StringBuilder sb = new StringBuilder();
-            int inputByteCount;
-            byte[] inputBuffer = new byte[bufferSize];
-            char[] charBuffer = new char[encoding.GetMaxCharCount(inputBuffer.Length)];
+        #endregion
 
-            while ((inputByteCount = dataStream.Read(inputBuffer, 0, inputBuffer.Length)) > 0)
+        #region Parser
+        private void Parser(string dataString)
+        {
+            string text = Regex.Replace(dataString, "\x1B(?:[@-Z\\-_]|[[0-?]*[ -/]*[@-~])", "");
+            if (text.Contains("has joined"))
             {
-                int readChars = decoder.GetChars(inputBuffer, 0, inputByteCount, charBuffer, 0);
-                if (readChars > 0)
-                    sb.Append(charBuffer, 0, readChars);
+                string pattern = @"(.+) has joined";
+                string joinedPlayer = Regex.Match(text, pattern).Groups[1].Value;
+                updatePlayerList(joinedPlayer, true);
             }
-            return sb.ToString();
+            if (text.Contains("has left"))
+            {
+                string pattern = @"(.+) has left";
+                string leftPlayer = Regex.Match(text, pattern).Groups[1].Value;
+                updatePlayerList(leftPlayer, false);
+            }
+            AddConsoleLine(text, Color.Black);
+        }
+
+        #endregion
+
+        #region PlayerMethods
+        private void updatePlayerList(string PlayerName, bool direction)
+        {
+            Invoke((MethodInvoker)delegate
+            {
+                if (direction) // 0 : left, 1 : joined
+                {
+                    PlayerList.Items.Add(PlayerName);
+                }
+                else
+                {
+                    PlayerList.Items.Remove(PlayerName);
+                }
+            });
+        }
+
+        private void BanPlayer(string PlayerName)
+        {
+            WriteConsole($"ban {PlayerName}");
+        }
+
+        private void KickPlayer(string PlayerName)
+        {
+            WriteConsole($"kick {PlayerName}");
         }
         #endregion
+
+        private void PlayerListUp_Click(object sender, EventArgs e)
+        {
+            if (PlayerList.Items.Count < 1) return;
+            if (PlayerList.SelectedIndex < 0)
+            {
+                PlayerList.SetSelected(0, true);
+            }
+            int index = PlayerList.SelectedIndex;
+            if (index > 1)
+            {
+                PlayerList.SetSelected(index, false);
+                PlayerList.SetSelected(index - 1, true);
+            }
+        }
+        private void PlayerListDown_Click(object sender, EventArgs e)
+        {
+            if (PlayerList.Items.Count < 1) return;
+            if (PlayerList.SelectedIndex < 0)
+            {
+                PlayerList.SetSelected(0, true);
+            }
+            int index = PlayerList.SelectedIndex;
+            if (index < PlayerList.Items.Count - 1)
+            {
+                PlayerList.SetSelected(index, false);
+                PlayerList.SetSelected(index + 1, true);
+            }
+        }
+
+        private void KickSelectedPlayer_Click(object sender, EventArgs e)
+        {
+            if (PlayerList.SelectedIndex < 0) return;
+            KickPlayer(PlayerList.SelectedItem.ToString());
+        }
+
+        private void BanSelectedPlayer_Click(object sender, EventArgs e)
+        {
+            if (PlayerList.SelectedIndex < 0) return;
+            BanPlayer(PlayerList.SelectedItem.ToString());
+        }
+
+        private void DiscordSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DiscordModule.Discord discord = new DiscordModule.Discord();
+            discord.Owner = this;
+            discord.Show();
+        }
     }
 }
