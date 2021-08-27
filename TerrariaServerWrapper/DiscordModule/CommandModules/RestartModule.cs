@@ -18,6 +18,7 @@ namespace TerrariaServerWrapper.DiscordModule.CommandModules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task Restart()
         {
+            MainServices.MainService.Instance.Restart();
             await ReplyAsync("Server restarted");
         }
     }

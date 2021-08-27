@@ -108,7 +108,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TerrariaServerController.cs" />
+    <Compile Include="MainServices\MainService.cs" />
     <Compile Include="DiscordModule\CommandModules\RestartModule.cs" />
     <Compile Include="DiscordModule\Discord.cs">
       <SubType>Form</SubType>
@@ -123,6 +123,8 @@
     <Compile Include="DiscordModule\Services\StartupService.cs" />
     <Compile Include="EnvVar.cs" />
     <Compile Include="Config\TemplateConfig.cs" />
+    <Compile Include="MainServices\Parser.cs" />
+    <Compile Include="Model\ConsoleMessage.cs" />
     <Compile Include="TerrariaServer.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -28,7 +28,10 @@ namespace TerrariaServerWrapper
         private IntPtr hSpawnPtyConfig;
         public Stream STDIN;
         public Stream STDOUT;
+        private int ProcessId;
 
+        [DllImport("kernel32.dll")]
+        static extern int GetProcessId(IntPtr handle);
 
         public ConsoleWrapper(string filePath, int consoleWidth, int consoleHeight, string args)
         {
@@ -59,6 +62,7 @@ namespace TerrariaServerWrapper
                 {
                     ErrorCheck(hError);
                 }
+                ProcessId = GetProcessId(hProcess);
             }
             finally
             {
@@ -67,12 +71,19 @@ namespace TerrariaServerWrapper
                 winpty_error_free(hError);
             }
         }
+        public bool IsRun()
+        {
+            try { Process.GetProcessById(ProcessId); }
+            catch (InvalidOperationException) { return false; }
+            catch (ArgumentException) { return false; }
+            return true;
+        }
 
         /// <summary>
         /// Write string into console
         /// </summary>
         /// <param name="input"></param>
-        public void WriteConsole(string input, Encoding encoding)
+        public void SendCommand(string input, Encoding encoding)
         {
             Encoder encoder = encoding.GetEncoder();
             char[] string1 = $"{input}{System.Environment.NewLine}".ToCharArray();

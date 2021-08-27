@@ -9,10 +9,11 @@ using System.Windows.Forms;
 
 namespace TerrariaServerWrapper
 {
-    public class EnvVar
+    public static class EnvVar
     {
         public static string TSWversion { get; } = "0.0.0.1";
         public static string AbsolutePath { get; } = Path.Combine(Application.StartupPath + "\\configs");
         public static TSWConfig TSWconfig { get; set; }
+        public static string ServerPath { get; set; }
     }
 }

@@ -41,7 +41,8 @@ namespace TerrariaServerWrapper.DiscordModule
 
         private void DiscordConnect_Click(object sender, EventArgs e)
         {
-
+            EnvVar.TSWconfig.BotToken = DiscordBotToken.Text;
+            MainServices.MainService.Instance.RunDiscord();
         }
     }
 }

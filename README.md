@@ -5,6 +5,7 @@ This is meant to making easier for me to manage my tModLoader Server.
 ## Resources
 - https://github.com/Aux/Discord.Net-Example
 - https://github.com/xPanini/TCR-TerrariaChatRelay
+- ...
 
 ## TO DO?
 
@@ -18,3 +19,6 @@ This is meant to making easier for me to manage my tModLoader Server.
 - 다른 게임 지원?
 - conpty로 전환하기
 - 명령 모듈 추가
+- 메서드 등의 정리
+- 로그 기능 추가
+- 설정 저장 기능 추가
