@@ -11,7 +11,7 @@ namespace TerrariaServerWrapper
 {
     public static class EnvVar
     {
-        public static string TSWversion { get; } = "0.0.0.1";
+        public static string TSWversion { get; } = "0.1.0.1";
         public static string AbsolutePath { get; } = Application.StartupPath;
         public static string ConfigPath { get; } = Path.Combine(Application.StartupPath, "configs");
         public static string myGamesPath { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "\\My Games\\Terraria");

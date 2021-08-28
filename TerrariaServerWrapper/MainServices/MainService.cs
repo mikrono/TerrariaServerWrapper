@@ -131,7 +131,7 @@ namespace TerrariaServerWrapper.MainServices
                     }
                 case ConsoleMessage.MessageType.PlayerState:
                     {
-                        MainForm.AddConsoleLine(consoleMessage.Data, Color.Black);
+                        MainForm.AddConsoleLine((consoleMessage.sender + " has " + consoleMessage.Data + Environment.NewLine), Color.Black);
                         if (consoleMessage.Data == "joined")
                         {
                             updatePlayerList(consoleMessage.sender, true);
