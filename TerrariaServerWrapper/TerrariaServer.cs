@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using TerrariaServerWrapper.Config;
+using TerrariaServerWrapper.Configs;
 using TerrariaServerWrapper.MainServices;
 
 namespace TerrariaServerWrapper

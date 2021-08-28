@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace TerrariaServerWrapper.Config
+namespace TerrariaServerWrapper.Configs
 {
     public abstract class TemplateConfig<T> : IConfig where T : TemplateConfig<T>, new()
     {
@@ -18,19 +18,19 @@ namespace TerrariaServerWrapper.Config
 
         public void Save()
         {
-            string file = Path.Combine(EnvVar.AbsolutePath, ConfigName);
+            string file = Path.Combine(EnvVar.ConfigPath, ConfigName);
             File.WriteAllText(file, Convert());
         }
 
         public bool Exists()
         {
-            string file = Path.Combine(EnvVar.AbsolutePath, ConfigName);
+            string file = Path.Combine(EnvVar.ConfigPath, ConfigName);
 
             return File.Exists(file);
         }
         public virtual IConfig GetConfig()
         {
-            string file = Path.Combine(EnvVar.AbsolutePath, ConfigName);
+            string file = Path.Combine(EnvVar.ConfigPath, ConfigName);
             T config;
 
             if (File.Exists(file))

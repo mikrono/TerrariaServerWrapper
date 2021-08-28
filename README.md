@@ -23,3 +23,7 @@ This is meant to making easier for me to manage my tModLoader Server.
 - 로그 기능 추가
 - 설정 저장 기능 추가
 - 주석 추가하기
+- 리팩토링
+- 바닐라와 모드로더 구분
+- 접속 국가에 대한 화이트 리스트와 블랙 리스트 기능 추가
+- 메모리 관리하기

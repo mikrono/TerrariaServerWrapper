@@ -10,16 +10,16 @@ using TerrariaServerWrapper;
 
 namespace TerrariaServerWrapper.DiscordModule.CommandModules
 {
-    [Name("Restart")]
-    public class RestartModule : ModuleBase<SocketCommandContext>
+    [Name("ConsoleCommander")]
+    public class commanderModule : ModuleBase<SocketCommandContext>
     {
-        [Command("restart")]
-        [Summary("Restart the Server")]
+        [Command("terraria")]
+        [Summary("command the Server")]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task Restart()
+        public async Task Command(string args)
         {
-            MainServices.MainService.Instance.Restart();
-            await ReplyAsync("Server restarted.");
+            MainServices.MainService.Instance.GetDiscordSendCommand(args);
+            await ReplyAsync("Maybe Accepted.");
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using TerrariaServerWrapper.Config;
+using TerrariaServerWrapper.Configs;
 using TerrariaServerWrapper.Model;
 using TerrariaServerWrapper.DiscordModule;
 using System.Threading;
@@ -39,6 +39,9 @@ namespace TerrariaServerWrapper.MainServices
             }
         }
 
+        /// <summary>
+        /// If there is no serverwrapper instance, make it and run. If the instance is exist, then, just run
+        /// </summary>
         public void StartServer()
         {
             if (!(Server != null) || (Server.State == 0))
@@ -165,6 +168,10 @@ namespace TerrariaServerWrapper.MainServices
             }
             cts.Cancel();
             StartServer();
+        }
+        public void GetDiscordSendCommand(string command)
+        {
+            WriteConsole(command);
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TerrariaServerWrapper.Config
+namespace TerrariaServerWrapper.Configs
 {
     public class TSWConfig : TemplateConfig<TSWConfig>
     {
